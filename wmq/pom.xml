@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+
+  <groupId>examples</groupId>
+  <artifactId>wmq</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>WMQ :: Parent</name>  
+
+  <properties>
+    <jboss.fuse.bom.version>6.2.0.redhat-133</jboss.fuse.bom.version>
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.fuse.bom</groupId>
+        <artifactId>jboss-fuse-parent</artifactId>
+        <version>${jboss.fuse.bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>2.3.7</version>
+          <extensions>true</extensions>
+          <executions>
+            <execution>
+             <id>bundle-manifest</id>
+             <phase>process-classes</phase>
+             <goals>
+                 <goal>manifest</goal>
+             </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+  <modules>
+    <module>features</module>
+    <module>wmqComponent</module>
+    <module>wmqTest</module>
+    <module>wmqConnFactoryTest</module>
+  </modules>
+  
+</project>  

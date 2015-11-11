@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"       
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd
+           http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+           ">
+
+  <!-- This example uses the shared connection factory to create the JMS component -->
+  
+  <reference id="MQConnectionFactory" interface="javax.jms.ConnectionFactory" filter="(osgi.jndi.service.name=jms/wmqConnectionFactory)"/>
+ 
+  <bean id="mywmq" class="org.apache.camel.component.jms.JmsComponent">
+    <property name="connectionFactory" ref="MQConnectionFactory"/>
+  </bean>
+   
+  <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+    <!-- HTTP request to queue -->
+    <route>
+      <from uri="jetty:http://0.0.0.0:9090/wmqConnFactoryTest"/>
+      <log message="Request received:\n${body}"/>
+      <setBody><simple>${body}</simple></setBody>
+      <to uri="mywmq:queue:QUEUE1"/>
+    </route>
+    
+    <!-- Queue consumer -->
+    <route>
+      <from uri="mywmq:queue:QUEUE1"/>
+      <to uri="log:comsumer?showAll=true&amp;multiline=true"/>
+      <setBody><simple>${header.CamelHttpUri}\n${body}\nResponse from Camel</simple></setBody>
+    </route>
+  </camelContext>
+  
+</blueprint>

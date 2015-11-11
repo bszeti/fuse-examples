@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+ xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+    ">
+
+
+ <cm:property-placeholder persistent-id="examples.wmq.wmqcomponent">
+  <cm:default-properties>
+   <cm:property name="hostName" value="localhost" />
+   <cm:property name="port" value="14141" />
+   <cm:property name="queueManager" value="QMA" />
+   <cm:property name="channel" value="MYCHANNEL" />
+   <cm:property name="transportType" value="1" />
+  </cm:default-properties>
+ </cm:property-placeholder>
+
+
+ <bean id="wmqConnectionFactory" class="com.ibm.mq.jms.MQConnectionFactory">
+  <property name="hostName" value="${hostName}" />
+  <property name="port" value="${port}" />
+  <property name="queueManager" value="${queueManager}" />
+  <property name="channel" value="${channel}" />
+  <property name="transportType" value="${transportType}" />
+ </bean>
+
+ <bean id="wmqComponentResolver" class="examples.wmq.wmqcomponent.WmqComponentResolver">
+  <property name="connectionFactory" ref="wmqConnectionFactory" />
+ </bean>
+
+
+ <!-- Publish OSGI services -->
+ <!-- Publish connection factory -->
+ <service ref="wmqConnectionFactory" interface="javax.jms.ConnectionFactory">
+  <service-properties>
+   <entry key="osgi.jndi.service.name" value="jms/wmqConnectionFactory" />
+  </service-properties>
+ </service>
+
+ <!-- Publish component resolvers -->
+ <!-- Component resolver for URIs like "wmq:QUEUE_NQME" -->
+ <service ref="wmqComponentResolver" interface="org.apache.camel.spi.ComponentResolver">
+  <service-properties>
+   <entry key="component" value="wmq" />
+  </service-properties>
+ </service>
+
+</blueprint>
+

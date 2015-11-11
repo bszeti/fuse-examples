@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<features name='examples.wmq' xmlns='http://karaf.apache.org/xmlns/features/v1.2.0'>
+  <!-- features:addurl mvn:examples.wmq/features/1.0.0-SNAPSHOT/xml/features -->
+  
+  <feature version='${project.version}' name='wmq-libs' description='WMQ 7.5.0.2 bundles' start-level='60'>   
+    <details>WebSphere MQ 7.5.0.2 client bundles</details>    
+    <bundle>mvn:com.ibm.mq.osgi/directip/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.mq.osgi/java/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/commonservices.j2se/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/jms/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/jms.prereq/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/nls/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/wmq/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/wmq.nls/7.5.0.2</bundle>
+    <bundle>mvn:com.ibm.msg.client.osgi/wmq.prereq/7.5.0.2</bundle>    
+  </feature>
+
+  <feature version='${project.version}' name='wmq-component' description='wmq component provider' start-level='70'>
+    <feature>wmq-libs</feature>
+    <bundle>mvn:examples.wmq/wmqComponent/${project.version}</bundle>
+  </feature> 
+  
+  <feature version='${project.version}' name='wmq-routes' description='wmq test routes' start-level='70'>
+    <feature>wmq-component</feature>
+    <bundle>mvn:examples.wmq/wmqTest/${project.version}</bundle>
+    <bundle>mvn:examples.wmq/wmqConnFactoryTest/${project.version}</bundle>
+  </feature> 
+  
+</features>
