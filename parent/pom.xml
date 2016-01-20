@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.mycompany</groupId>
+  <artifactId>parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>My Company :: Parent</name>
+
+  <properties>
+    <!-- unify the encoding for all the modules -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- dependency versions -->
+    <jboss.fuse.bom.version>6.2.1.redhat-084</jboss.fuse.bom.version>
+
+    <!-- plugin versions -->
+    <maven-bundle-plugin-version>2.5.3</maven-bundle-plugin-version>
+    <maven-surefire-plugin-version>2.19</maven-surefire-plugin-version>
+    <maven-install-plugin-version>2.4</maven-install-plugin-version>
+    <maven-deploy-plugin-version>2.8.1</maven-deploy-plugin-version>
+    <maven-compiler-plugin-version>3.1</maven-compiler-plugin-version>
+    <maven-resources-plugin-version>2.6</maven-resources-plugin-version> <!-- Version 2.7 doesn't package .gitignore which is required in archetype projects -->
+    <build-helper-maven-plugin-version>1.9.1</build-helper-maven-plugin-version>
+    <lifecycle-mapping-version>1.0.0</lifecycle-mapping-version>
+    <camel-version>2.15.1.redhat-621084</camel-version>
+    <camel-test-blueprint-version>2.15.1.redhat-621086</camel-test-blueprint-version> <!-- Issue CAMEL-9142 causes problems in v6.2.1-084. See https://issues.apache.org/jira/browse/-->
+    <pax-url-classpath-version>2.4.2</pax-url-classpath-version>
+
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.fuse.bom</groupId>
+        <artifactId>jboss-fuse-parent</artifactId>
+        <version>${jboss.fuse.bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.url</groupId>
+        <artifactId>pax-url-classpath</artifactId>
+        <version>${pax-url-classpath-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-test-blueprint</artifactId>
+        <version>${camel-test-blueprint-version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- Deploy artifacts to this repo -->
+  <distributionManagement>
+    <repository>
+      <id>your-nexus</id>
+      <name>Your internal releases repository</name>
+      <url>http://yournexusserver/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>your-nexus</id>
+      <name>Your internal snapshots repository</name>
+      <url>http://yournexusserver/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <!-- These are the repositories needed to build Fuse projects (or the Fuse source)
+       http://repo1.maven.org/maven2
+       http://repo.fusesource.com/nexus/content/repositories/releases
+       http://repository.jboss.org/nexus/content/groups/public
+       http://repo.fusesource.com/nexus/content/groups/ea
+       http://maven.repository.redhat.com/techpreview/all
+
+       Instead of having them defined in the parent pom, these can be configured in your settings.xml or in a repository manager (Nexus)
+  -->
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>fs-jboss-public</id>
+      <name>FS JBoss Public Repository Group</name>
+      <url>http://repo.fusesource.com/nexus/content/repositories/releases</url>
+    </repository>
+    <repository>
+      <id>jboss-public</id>
+      <name>JBoss Public Repository Group</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>fuse-ea</id>
+      <name>Fuse EA Repository</name>
+      <url>http://repo.fusesource.com/nexus/content/groups/ea</url>
+    </repository>
+    <repository>
+      <id>enterprise</id>
+      <name>Enterprise Releases</name>
+      <url>http://maven.repository.redhat.com/techpreview/all</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>fs-jboss-public</id>
+      <name>FS JBoss Public Repository Group</name>
+      <url>http://repo.fusesource.com/nexus/content/repositories/releases</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>jboss-public</id>
+      <name>JBoss Public Repository Group</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>fuse-ea</id>
+      <name>Fuse EA Repository</name>
+      <url>http://repo.fusesource.com/nexus/content/groups/ea</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>enterprise</id>
+      <name>Enterprise Releases</name>
+      <url>http://maven.repository.redhat.com/techpreview/all</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <pluginManagement>
+      <plugins>
+        <!-- plugin bindings for bundle packaging -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin-version}</version>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven-install-plugin-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>${maven-bundle-plugin-version}</version>
+          <extensions>true</extensions>
+          <executions>
+            <!-- To support jar packaging with OSGi metadata -->
+            <execution>
+              <id>bundle-manifest</id>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>manifest</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <!-- To support jar packaging with OSGi metadata -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-maven-plugin</artifactId>
+          <version>${camel-version}</version>
+          <configuration>
+            <useBlueprint>true</useBlueprint>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-maven-plugin-version}</version>
+        </plugin>
+
+        <plugin>
+          <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>${lifecycle-mapping-version}</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <versionRange>${maven-bundle-plugin-version}</versionRange>
+                    <goals>
+                      <goal>manifest</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+  </build>
+
+</project>
