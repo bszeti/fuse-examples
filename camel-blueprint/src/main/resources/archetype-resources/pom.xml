@@ -31,12 +31,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- To support properties file from classpath -->
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-classpath</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
