@@ -4,7 +4,7 @@
 
   <groupId>com.mycompany</groupId>
   <artifactId>parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>6.2.1.redhat-084</version>
   <packaging>pom</packaging>
 
   <name>My Company :: Parent</name>
