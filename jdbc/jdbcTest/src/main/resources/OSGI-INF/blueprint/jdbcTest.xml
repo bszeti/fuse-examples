@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+	xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           ">
+
+
+	<cm:property-placeholder id="config.local" persistent-id="my.company.jdbc.datasource.jdbcTest"  update-strategy="none">
+		<cm:default-properties>
+			<cm:property name="period" value="10000" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+	
+
+	<!-- Bundle's datasource -->
+	<cm:property-placeholder persistent-id="my.company.jdbc.datasource.mydb"  placeholder-prefix="$[" placeholder-suffix="]" update-strategy="none">
+		<cm:default-properties>
+			<cm:property name="databaseName" value="data/derby/myDB3" />
+			<cm:property name="user" value="myuser" />
+			<cm:property name="password" value="secret" />
+			
+			<cm:property name="period" value="10000" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+	<bean id="myDataSource" class="org.apache.derby.jdbc.EmbeddedDataSource">
+		<property name="databaseName" value="$[databaseName]" />
+		<property name="user" value="$[user]" />
+		<property name="password" value="$[password]" />
+		<property name="createDatabase" value="create" />
+	</bean>
+
+
+	<!-- Simple shared datasource -->
+	<reference id="sharedDataSource" interface="javax.sql.DataSource" filter="(datasource=myderby)" />
+
+	<!-- Pooled shared datasource -->
+	<reference id="pooledDataSource" interface="javax.sql.DataSource" filter="(datasource=dbpool)" />
+
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
+
+		<route id="bundleTest">
+			<from uri="timer:bundleTest?period={{period}}" />
+			<to uri="sql:VALUES 1?dataSource=myDataSource" />
+			<log message="Bundle's ds: ${body}" />
+		</route>
+
+		<route id="sharedTest">
+			<from uri="timer:sharedTest?period={{period}}" />
+			<to uri="sql:VALUES 1?dataSource=sharedDataSource" />
+			<log message="Shared ds: ${body}" />
+		</route>
+
+		<route id="pooledTest">
+			<from uri="timer:pooledTest?period={{period}}" />
+			<to uri="sql:VALUES 1?dataSource=pooledDataSource" />
+			<log message="Pooled ds: ${body}" />
+		</route>
+
+	</camelContext>
+
+</blueprint>

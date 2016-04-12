@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       >
+
+  <!-- Using the datasource factory created by OPS4J Pax JDBC
+       See: https://ops4j1.jira.com/wiki/display/PAXJDBC/Pooling+and+XA+support+for+DataSourceFactory -->
+  <reference id="dbpoolDataSourceFactory" interface="org.osgi.service.jdbc.DataSourceFactory" filter="(osgi.jdbc.driver.name=derby-pool)"/>
+
+  <!-- Create datasource -->
+  <bean id="dbpoolDataSource" factory-ref="dbpoolDataSourceFactory" factory-method="createDataSource" destroy-method="close">
+  	<argument >
+      <props>
+        <prop key="databaseName" value="data/derby/poolDB"/>
+        <prop key="createDatabase" value="create"/>
+        <prop key="user" value="myuser"/>
+        <prop key="password" value="secret"/>
+      </props>
+  	</argument>
+  </bean>
+
+  <!-- Publish datasource -->
+  <service ref="dbpoolDataSource" interface="javax.sql.DataSource">
+    <service-properties>
+      <entry key="datasource" value="dbpool"/>
+      <entry key="osgi.jndi.service.name" value="jdbc/dbpool"/>
+    </service-properties>
+  </service>
+
+</blueprint>

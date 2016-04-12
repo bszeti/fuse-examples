@@ -4,18 +4,23 @@
 
   <groupId>com.mycompany</groupId>
   <artifactId>parent</artifactId>
-  <version>6.2.1.redhat-084</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>My Company :: Parent</name>
 
   <properties>
+
+    <osgi-import-package>*</osgi-import-package>
+
     <!-- unify the encoding for all the modules -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- dependency versions -->
-    <jboss.fuse.bom.version>6.2.1.redhat-084</jboss.fuse.bom.version>
+    <jboss.fuse.bom.version>6.2.1.redhat-090</jboss.fuse.bom.version> <!-- Issue CAMEL-9142 causes problems in v6.2.1-084. See https://issues.apache.org/jira/browse/-->
+    <camel-version>2.15.1.redhat-621090</camel-version>
+    <camel-test-blueprint-version>2.15.1.redhat-621090</camel-test-blueprint-version>
 
     <!-- plugin versions -->
     <maven-bundle-plugin-version>2.5.3</maven-bundle-plugin-version>
@@ -24,13 +29,19 @@
     <maven-deploy-plugin-version>2.8.1</maven-deploy-plugin-version>
     <maven-compiler-plugin-version>3.1</maven-compiler-plugin-version>
     <maven-resources-plugin-version>2.6</maven-resources-plugin-version> <!-- Version 2.7 doesn't package .gitignore which is required in archetype projects -->
+    <!-- <maven-enforcer-plugin-version>1.1</maven-enforcer-plugin-version> -->
+    <!-- <maven-failsafe-plugin-version>2.12</maven-failsafe-plugin-version> -->
+    <!-- <maven-jboss-as-plugin-version>7.3.Final</maven-jboss-as-plugin-version> -->
+    <!-- <maven-war-plugin-version>2.4</maven-war-plugin-version> -->
+
     <build-helper-maven-plugin-version>1.9.1</build-helper-maven-plugin-version>
     <lifecycle-mapping-version>1.0.0</lifecycle-mapping-version>
-    <camel-version>2.15.1.redhat-621084</camel-version>
-    <camel-test-blueprint-version>2.15.1.redhat-621086</camel-test-blueprint-version> <!-- Issue CAMEL-9142 causes problems in v6.2.1-084. See https://issues.apache.org/jira/browse/-->
 
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+
+    <oracle.version>11.2.0.4</oracle.version>
+    <derby.version>10.11.1.1</derby.version>
   </properties>
 
   <dependencyManagement>
@@ -47,6 +58,8 @@
         <artifactId>camel-test-blueprint</artifactId>
         <version>${camel-test-blueprint-version}</version>
       </dependency>
+
+
     </dependencies>
   </dependencyManagement>
 
@@ -140,12 +153,6 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
     <pluginManagement>
       <plugins>
         <!-- plugin bindings for bundle packaging -->
@@ -193,6 +200,13 @@
               </goals>
             </execution>
           </executions>
+          <configuration>
+            <instructions>
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+              <Import-Package>${osgi-import-package}</Import-Package>
+              <Private-Package>${osgi-private-package}</Private-Package>
+            </instructions>
+          </configuration>
         </plugin>
         <plugin>
           <!-- To support jar packaging with OSGi metadata -->

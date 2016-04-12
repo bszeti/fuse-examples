@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xmlns:enc="http://karaf.apache.org/xmlns/jasypt/v1.0.0">
+
+
+	<cm:property-placeholder id="config.osgi" persistent-id="com.mycompany.jdbc.datasource.myoracle" update-strategy="reload" />
+
+	<enc:property-placeholder>
+		<enc:encryptor class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+			<property name="config">
+				<bean class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+					<property name="algorithm" value="PBEWithMD5AndDES" />
+					<property name="passwordEnvName" value="ENCRYPTION_PASSWORD" />
+				</bean>
+			</property>
+		</enc:encryptor>
+	</enc:property-placeholder>
+
+	<bean id="myoracleDataSourceJasypt" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">
+		<property name="URL" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="connectionCachingEnabled" value="true" />
+	</bean>
+
+	<service ref="myoracleDataSourceJasypt" interface="javax.sql.DataSource">
+		<service-properties>
+			<entry key="datasource" value="myoracleJasypt" />
+			<entry key="osgi.jndi.service.name" value="jdbc/myoracleJasypt" />
+		</service-properties>
+	</service>
+
+</blueprint>

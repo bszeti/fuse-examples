@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Examples"
+	xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.0.0 http://karaf.apache.org/xmlns/features/v1.0.0">
+
+	<!-- Add pax-jdbc feature repo -->
+	<repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/0.6.0/xml/features</repository>
+
+	<feature name="com.mycompany.jdbc" version="${project.version}"
+		description="Examples :: JDBC">
+
+		<!-- Karaf features -->
+		<!-- <feature>jdbc</feature> -->
+		<feature>jndi</feature>
+
+		<!-- Camel features -->
+		<feature>camel-sql</feature>
+		<feature>camel-mybatis</feature>
+
+		<!-- JDBC drivers -->
+		<bundle dependency="true">wrap:mvn:com.oracle/ojdbc6/${oracle.version}</bundle>
+		<!-- <bundle dependency="true">mvn:org.apache.derby/derby/${derby.version}</bundle> -->
+
+		<!-- OPS4J Pax JDBC -->
+		<feature>pax-jdbc-pool-dbcp2</feature>
+		<feature>pax-jdbc-derby</feature>
+
+		<!-- DataSource provider bundles -->
+		<bundle dependency="true">mvn:com.mycompany.jdbc.datasource/myoracle/${project.version}</bundle>
+		<bundle dependency="true">mvn:com.mycompany.jdbc.datasource/myderby/${project.version}</bundle>
+		<bundle dependency="true">mvn:com.mycompany.jdbc.datasource/dbpool/${project.version}</bundle>
+
+		<!-- Bundles using the datasources -->
+		<bundle dependency="true">mvn:com.mycompany.jdbc/jdbcTest/${project.version}</bundle>
+		<bundle dependency="true">mvn:com.mycompany.jdbc/mybatisJndi/${project.version}</bundle>
+	</feature>
+
+</features>

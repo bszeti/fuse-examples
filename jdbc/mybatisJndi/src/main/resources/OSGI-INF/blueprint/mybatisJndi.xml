@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd
+           ">
+
+  <!-- This example uses the mybatis component and jndi feature -->
+
+  <camelContext xmlns="http://camel.apache.org/schema/blueprint">
+    <route id="mybatisJndi">
+      <from uri="timer:mybatisJndi?period=10000"/>
+      <to uri="mybatis:my.check?statementType=SelectOne" />
+      <log message="Mybatis query result: ${body}"/>
+    </route>
+
+  </camelContext>
+
+</blueprint>
