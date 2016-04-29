@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           ">
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint" id="context-multiContextTest">
+
+		<route id="direct-call-hello">
+			<from uri="direct:call-hello" />
+			<to uri="direct-vm:hello?block=true&amp;timeout=5000"/>
+			<log message="Hello says: ${body}" />
+		</route>
+
+	</camelContext>
+
+</blueprint>

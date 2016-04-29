@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0 https://osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           ">
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint" id="context-directCommon">
+
+		<route id="direct-vm-hello">
+			<from uri="direct-vm:hello" />
+			<setBody>
+				<simple>Hello ${body}</simple>
+			</setBody>
+			<log message="hello response: ${body}" />
+		</route>
+
+	</camelContext>
+
+</blueprint>
