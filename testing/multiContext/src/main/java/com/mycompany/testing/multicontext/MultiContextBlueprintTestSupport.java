@@ -8,13 +8,17 @@ import java.util.Iterator;
 import java.util.jar.Manifest;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.test.blueprint.CamelBlueprintHelper;
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.camel.util.StopWatch;
+import org.apache.camel.util.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MultiContextBlueprintTestSupport extends CamelBlueprintTestSupport {
-	Logger log = LoggerFactory.getLogger(MultiContextBlueprintTestSupport.class);
+	private static final Logger log = LoggerFactory.getLogger(MultiContextBlueprintTestSupport.class);
+	private final StopWatch mywatch = new StopWatch();
 
 	/**
 	 * If more than one Camel contexts are available, set the name of the
@@ -103,5 +107,34 @@ public class MultiContextBlueprintTestSupport extends CamelBlueprintTestSupport 
 				context.start();
 			}
 		}
+		mywatch.restart();
+	}
+
+	@Override
+	public void tearDown() throws Exception {
+		// The CamelBlueprintTestSupport clears system properties:
+		// skipStartingCamelContext and registerBlueprintCamelContextEager. This
+		// can cause the context being restarted during tearDown and conflicts
+		// if the next test uses the same context and creating a direct endpoint
+		// (java.lang.IllegalStateException: A consumer .. already exists)
+
+		long time = mywatch.stop();
+
+		log.info("********************************************************************************");
+		log.info("Testing done: " + getTestMethodName() + "(" + getClass().getName() + ")");
+		log.info("Took: " + TimeUtils.printDuration(time) + " (" + time + " millis)");
+		log.info("********************************************************************************");
+
+		if (isCreateCamelContextPerClass()) {
+			// we tear down in after class
+			return;
+		}
+
+		// This is a simpler way of shutting down the context than the original
+		// code and might not be sufficient in all cases
+		context.stop();
+
+		CamelBlueprintHelper.disposeBundleContext(getBundleContext());
+
 	}
 }
