@@ -18,9 +18,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- dependency versions -->
-    <jboss.fuse.bom.version>6.2.1.redhat-090</jboss.fuse.bom.version> <!-- Issue CAMEL-9142 causes problems in v6.2.1-084. See https://issues.apache.org/jira/browse/-->
-    <camel-version>2.15.1.redhat-621090</camel-version>
-    <camel-test-blueprint-version>2.15.1.redhat-621090</camel-test-blueprint-version>
+    <jboss.fuse.bom.version>6.2.1.redhat-117</jboss.fuse.bom.version> <!-- Issue CAMEL-9142 causes problems in v6.2.1-084. See https://issues.apache.org/jira/browse/-->
+    <camel-version>2.15.1.redhat-621117</camel-version>
+    <camel-test-blueprint-version>2.15.1.redhat-621117</camel-test-blueprint-version>
 
     <!-- plugin versions -->
     <maven-bundle-plugin-version>2.5.3</maven-bundle-plugin-version>
