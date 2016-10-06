@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    ">
+
+	<cm:property-placeholder persistent-id="com.mycompany.cache.cacheComponent">
+		<cm:default-properties>
+			<cm:property name="expireTime" value="100" />
+			<cm:property name="cacheName" value="myCache" />
+			<!-- If overFlowToDisk=true then the stored objects must be serializable -->
+			<cm:property name="cacheParams"
+				value="timeToLiveSeconds={{expireTime}}&amp;timeToIdleSeconds={{expireTime}}&amp;maxElementsInMemory=1000&amp;objectCache=true&amp;overflowToDisk=false" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+	<camelContext id="cacheFullUri" xmlns="http://camel.apache.org/schema/blueprint">
+
+		<route id="incomingRequest">
+			<!-- The best way to create the cache is to set everything in the uri and use it everywhere -->
+			<from uri="direct:incomingRequest" />
+			<log message="Request received: ${body}" />
+			<setProperty propertyName="request">
+				<simple>${body}</simple>
+			</setProperty>
+
+			<!-- Lookup in cache -->
+			<setHeader headerName="CamelCacheKey">
+				<simple>::${exchangeProperty.request}::</simple>
+			</setHeader>
+			<setHeader headerName="CamelCacheOperation">
+				<constant>CamelCacheGet</constant>
+			</setHeader>
+			<to uri="cache://{{cacheName}}?{{cacheParams}}" />
+
+			<choice>
+				<when>
+					<simple>${header.CamelCacheElementWasFound} == null</simple>
+					<!-- Not in cache -->
+					<to uri="direct:doTheQuery" />
+
+					<!-- Store in cache -->
+					<setHeader headerName="CamelCacheKey">
+						<simple>::${exchangeProperty.request}::</simple>
+					</setHeader>
+					<setHeader headerName="CamelCacheOperation">
+						<constant>CamelCacheAdd</constant>
+					</setHeader>
+					<to uri="cache://{{cacheName}}?{{cacheParams}}" />
+				</when>
+				<otherwise>
+					<log message="Response was found in cache" />
+				</otherwise>
+			</choice>
+			<log message="Response: ${body}" />
+		</route>
+
+		<route id="doTheQuery">
+			<from uri="direct:doTheQuery" />
+			<log message="Do the query."/>
+			<setBody>
+				<simple>QueryResponse-${body}</simple>
+			</setBody>
+		</route>
+	</camelContext>
+
+	<!-- The other way is to use an init route with the config (e.g. cacheConfig), but here the order of creating the routes by the context matters 
+		in this case! Don't do this! -->
+	<!-- 
+	<bean id="cacheConfig" class="org.apache.camel.component.cache.CacheConfiguration">
+		<property name="timeToIdleSeconds" value="0" />
+		<property name="timeToLiveSeconds" value="0" />
+		<property name="eternal" value="true" />
+	</bean>
+	<camelContext id="cacheFullUri" xmlns="http://camel.apache.org/schema/blueprint">
+		<route id="cache-init">
+			<from uri="cache://myCache?configuration=#cacheConfig" />
+			<stop />
+		</route>
+		<route id="use-cache">
+			<from uri="direct:incomingRequest" />
+			...
+			<to uri="cache://myCache" />
+		</route>
+	</camelContext>
+	 -->
+
+</blueprint>
