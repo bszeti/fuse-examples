@@ -1,0 +1,10 @@
+{
+"field1":"value1",
+"object1":{
+	"a":"A",
+	"numArray":[3,1,2],
+	"bool": true
+	},
+"array1": ["c","b","a"],
+"field2":"value2"
+}
