@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xmlns:cxf="http://camel.apache.org/schema/blueprint/cxf"
+	xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+    http://camel.apache.org/schema/blueprint/cxf https://camel.apache.org/schema/cxf/camel-cxf-2.15.1-blueprint.xsd
+    ">
+    
+
+	<!-- Moxy JaxbContext -->
+	<bean id="moxyJaxbContext" class="org.eclipse.persistence.jaxb.JAXBContextFactory" factory-method="createContext">
+		<argument index="0">
+			<array value-type="java.lang.Class">
+				<value>com.mycompany.cxf.restServer.model.ResponseData</value>
+			</array>
+		</argument>
+		<argument index="1">
+			<map>
+				<entry key="eclipselink.oxm.metadata-source"> <!-- value="com/mycompany/cxf/restServer/model/response-data-binding.xml" -->
+					<list>
+						<value>com/mycompany/cxf/restServer/model/response-data-binding.xml</value>
+					</list>
+				</entry>
+<!-- 				<entry key="eclipselink.json.include-root"> -->
+<!-- 					<value type="java.lang.Boolean">false</value> -->
+<!-- 				</entry> -->
+<!-- 				<entry key="eclipselink.media-type" value="application/json"> -->
+			</map>
+		</argument>
+	</bean>
+
+	<!-- Use the context in the providers -->
+	<bean id="moxyJsonProvider" class="com.mycompany.cxf.utils.MoxyCxfJsonProvider">
+		<property name="jaxbContext" ref="moxyJaxbContext" />
+	</bean>
+	<bean id="moxyJaxbProvider" class="com.mycompany.cxf.utils.MoxyCxfJaxbProvider">
+		<property name="jaxbContext" ref="moxyJaxbContext" />
+	</bean>
+
+
+	<!-- CXF rest server bean, can be used in endpoints -->
+	<cxf:rsServer id="cxfRsServer" address="http://0.0.0.0:9090/restservices" serviceClass="com.mycompany.cxf.restServer.action.RestProviderEndpoint"
+		loggingFeatureEnabled="true">
+		<cxf:providers>
+			<ref component-id="moxyJsonProvider" />
+			<ref component-id="moxyJaxbProvider" />
+		</cxf:providers>
+	</cxf:rsServer>
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint" id="exmpleMoxyContext" useMDCLogging="true">
+	
+		<!-- Provide a CXF endpoint, http requests are processed by the route -->
+		<route id="cxfServer">
+			<from uri="cxfrs://bean://cxfRsServer?bindingStyle=SimpleConsumer" />
+			<!-- Parameters are bound as message headers -->
+			<to uri="log:cxfServer?showAll=true&amp;multiline=true" />
+		</route>
+
+	</camelContext>
+
+</blueprint>

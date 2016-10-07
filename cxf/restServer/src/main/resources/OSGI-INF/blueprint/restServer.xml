@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xmlns:cxf="http://camel.apache.org/schema/blueprint/cxf"
+	xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+    http://camel.apache.org/schema/blueprint/cxf https://camel.apache.org/schema/cxf/camel-cxf-2.15.1-blueprint.xsd
+    ">
+
+	<cm:property-placeholder persistent-id="com.mycompany.cxf.restServer">
+		<cm:default-properties>
+			<cm:property name="port" value="9090" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+
+	<!-- Jettison json provider -->
+	<bean id="jsonProviderJettison" class="org.apache.cxf.jaxrs.provider.json.JSONProvider">
+		<property name="dropRootElement" value="true" />
+		<property name="attributesToElements" value="true" />
+	</bean>
+	
+	
+	<!-- CXF rest server bean, can be used in endpoints -->
+	<cxf:rsServer id="cxfRsServer" address="http://0.0.0.0:{{port}}/restservices" serviceClass="com.mycompany.cxf.restServer.action.RestProviderEndpoint"
+		loggingFeatureEnabled="true">
+		<cxf:serviceBeans>
+			<!-- Can use bean objects instead of serviceClass interface as well -->
+			<!-- <bean class="com.mycompany.cxf.restServer.action.RestProviderEndpoint" /> -->
+		</cxf:serviceBeans>
+		<cxf:features>
+			<!-- Can add features this way too, but easier with loggingFeatureEnabled="true" -->
+			<!-- <bean class="org.apache.cxf.feature.LoggingFeature" /> -->
+		</cxf:features>
+		<cxf:providers>
+			<!-- Add different marshalling providers here -->
+			<!-- JAXBElementProvider and Jettison JSONProvider are added by default if none is set. Both use the Jaxb annotations -->
+			<!-- <bean class="org.apache.cxf.jaxrs.provider.JAXBElementProvider" /> -->
+			<!-- <bean class="org.apache.cxf.jaxrs.provider.json.JSONProvider" /> -->
+
+			<!-- This is how to use the custom Jettison JSONProvider defined above -->
+			<!-- <ref component-id="jsonProviderJettison" /> -->
+
+			<!-- Jackson json provider -->
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+			
+			<!-- Exception mapper for CXF -->
+			<bean class="com.mycompany.cxf.restServer.utils.ExceptionMapper"/>
+
+		</cxf:providers>
+	</cxf:rsServer>
+
+	<!-- Share the proxy bean as OSGi service -->
+	<!-- For simplicity the service interface is also defined in this bundle -->
+	<service interface="com.mycompany.cxf.restServer.action.OsgiService" ref="osgiServiceProxy" />
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
+
+		<!-- Camel proxy is used to create a bean representing the camel route. Required for the osgi service only. (Proxy tag is expected before routes) -->
+		<proxy id="osgiServiceProxy" serviceInterface="com.mycompany.cxf.restServer.action.OsgiService" serviceUrl="direct:osgiService" />
+
+		<!-- Provide a CXF endpoint, http requests are processed by the route -->
+		<route id="cxfServer">
+			<from uri="cxfrs://bean://cxfRsServer?bindingStyle=SimpleConsumer" />
+			<!-- Parameters are bound as message headers -->
+			<to uri="log:cxfServer?showAll=true&amp;multiline=true" />
+
+			<to uri="direct:serviceRoute" />
+
+			<!-- Remove headers from message otherwise they have an impact on the http response -->
+			<removeHeaders pattern="*" />
+			<!-- CXF builds the Response from body + CamelHttpResponseCode -->
+			<setHeader headerName="CamelHttpResponseCode">
+				<constant>200</constant>
+			</setHeader>
+		</route>
+
+		<!-- Route behind the proxy bean shared as an OSGi service -->
+		<route id="osgiService">
+			<from uri="direct:osgiService" />
+			
+			<!-- Before Camel 2.16 bean annotations don't work, so we need to get the arguments from BeanInvocation -->
+			<bean beanType="com.mycompany.cxf.restServer.route.RouteHelper" method="bindHeadersFromInvocation" />
+			<to uri="log:osgiService?showAll=true&amp;multiline=true" />
+
+			<to uri="direct:serviceRoute" />
+		</route>
+
+
+		<!-- This route does the job and returns a ResponseData object -->
+		<route id="serviceRoute">
+			<from uri="direct:serviceRoute" />
+			<setBody>
+				<method bean="com.mycompany.cxf.restServer.route.RouteHelper" method="getResponseData" />
+			</setBody>
+		</route>
+
+	</camelContext>
+
+</blueprint>

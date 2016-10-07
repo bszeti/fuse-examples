@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" xmlns:cxf="http://camel.apache.org/schema/blueprint/cxf"
+	xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+    http://camel.apache.org/schema/blueprint/cxf https://camel.apache.org/schema/cxf/camel-cxf-2.15.1-blueprint.xsd
+    ">
+
+	<cm:property-placeholder persistent-id="com.mycompany.cxf.restServer">
+		<cm:default-properties>
+			<cm:property name="endpoint" value="http://localhost:9090/" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+
+	<!-- Jettison json provider -->
+	<!-- <bean id="jsonProviderJettison" class="org.apache.cxf.jaxrs.provider.json.JSONProvider"> -->
+	<!-- <property name="dropRootElement" value="true" /> -->
+	<!-- <property name="attributesToElements" value="true" /> -->
+	<!-- </bean> -->
+
+
+	<!-- CXF rest server bean, can be used in endpoints -->
+	<cxf:rsClient id="cxfRsClient" serviceClass="com.mycompany.cxf.restClient.action.RestClientEndpoint" loggingFeatureEnabled="true"> <!-- Basic auth: username="myuser" password="xxx" -->
+		<cxf:providers>
+			<bean class="org.apache.cxf.jaxrs.provider.JAXBElementProvider" />
+
+			<!-- Jackson json provider -->
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+		</cxf:providers>
+	</cxf:rsClient>
+
+
+
+	<camelContext xmlns="http://camel.apache.org/schema/blueprint">
+
+		<route id="cxfClient">
+			<from uri="timer:cxfClient?repeatCount=1" />
+			<setHeader headerName="CamelDestinationOverrideUrl">
+				<simple>{{endpoint}}/restservices/provider/query/123?text=HelloClient&amp;addDetails=true</simple>
+			</setHeader>
+			<setHeader headerName="CamelCxfRsUsingHttpAPI">
+				<constant>false</constant>
+			</setHeader>
+
+			<setHeader headerName="operationName">
+				<constant>restClientQuery</constant>
+			</setHeader>
+			<log message="Calling rest service accepting XML"/>
+			<inOut uri="cxfrs://bean://cxfRsClient" />
+			<!-- The log component will automatically use the Jaxb marshaller for the QueryResponse object -->
+			<to uri="log:cxfClient?showAll=true&amp;multiline=true" />
+
+			<setBody>
+				<simple>null</simple>
+			</setBody>
+			<setHeader headerName="CamelDestinationOverrideUrl">
+				<simple>{{endpoint}}/restservices/provider/query/123?text=HelloClient</simple>
+			</setHeader>
+			<setHeader headerName="operationName">
+				<constant>restClientQueryJson</constant>
+			</setHeader>
+			<log message="Calling rest service accepting JSON"/>
+			<inOut uri="cxfrs://bean://cxfRsClient" />
+			<to uri="log:cxfClient?showAll=true&amp;multiline=true" />
+
+		</route>
+
+
+	</camelContext>
+
+</blueprint>

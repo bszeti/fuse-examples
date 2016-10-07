@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cxf="http://camel.apache.org/schema/blueprint/cxf"
+	xsi:schemaLocation="
+    http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+    http://camel.apache.org/schema/blueprint/cxf https://camel.apache.org/schema/cxf/camel-cxf-2.15.1-blueprint.xsd
+    ">
+
+	<!-- Lookup OSGi service -->
+	<reference id="providerQueryService" interface="com.mycompany.cxf.restServer.action.OsgiService"/>
+
+	<camelContext id="osgiClient" xmlns="http://camel.apache.org/schema/blueprint">
+
+		<route id="testOsgiService">
+			<!-- Call osgi service once on startup -->
+			<from uri="timer:testOsgiService?repeatCount=1" />
+			<bean ref="providerQueryService" method="query(100,'Hello there!',true)" />
+			<log message="Response from osgi service: ${body.toString()}" />
+		</route>
+
+	</camelContext>
+
+</blueprint>
